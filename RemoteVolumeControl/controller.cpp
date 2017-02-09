@@ -9,7 +9,7 @@ const char delims[] = "\r\n";
 const int dataLenght{ 255 };
 char incomingData[256] = "";
 char *context = nullptr;
-double volumeLevel{ 50.0 };
+double volumeLevel{ 0.5 };
 
 
 
@@ -103,7 +103,7 @@ void main() {
 	
 	//TODO: input port number, get initial volume level
 
-	SerialReadCOM* SP = new SerialReadCOM("\\\\.\\COM3");
+	SerialReadCOM* SP = new SerialReadCOM("\\\\.\\COM4");
 
 	if (SP->isConnected())
 		printf("Arduino Connected!");
@@ -148,7 +148,7 @@ void main() {
 			tok = strtok_s(nullptr, delims, &context);
 		}
 		
-		Sleep(500);
+		Sleep(100);
 	}
 
 	
