@@ -1,6 +1,7 @@
 #include "SerialReadCOM.h"
 #include <cstring>
-#pragma comment (lib, "winmm")
+#include <mmdeviceapi.h>
+#include <endpointvolume.h>
 
 const char buttonPlus[] = "FFA857";
 const char buttonMinus[] = "FFE01F";
@@ -8,7 +9,63 @@ const char delims[] = "\r\n";
 const int dataLenght{ 255 };
 char incomingData[256] = "";
 char *context = nullptr;
-short volumeLevel{ 60 };
+double volumeLevel{ 50.0 };
+
+
+
+//enter value from 0.0 to 1.0
+bool changeVolume(double nVolume, bool bScalar)
+{
+	HRESULT hr = NULL;
+	bool decibels = false;
+	bool scalar = false;
+	double newVolume = nVolume;
+
+	CoInitialize(NULL);
+
+	IMMDeviceEnumerator* deviceEnumerator = NULL;
+
+	hr = CoCreateInstance(__uuidof(MMDeviceEnumerator),
+		NULL,
+		CLSCTX_INPROC_SERVER,
+		__uuidof(IMMDeviceEnumerator),
+		(LPVOID *)&deviceEnumerator);
+
+	IMMDevice *defaultDevice = NULL;
+
+	hr = deviceEnumerator->GetDefaultAudioEndpoint(eRender, eConsole, &defaultDevice);
+	deviceEnumerator->Release();
+	deviceEnumerator = NULL;
+
+	IAudioEndpointVolume *endpointVolume = NULL;
+	hr = defaultDevice->Activate(__uuidof(IAudioEndpointVolume),
+		CLSCTX_INPROC_SERVER, NULL, (LPVOID *)&endpointVolume);
+	defaultDevice->Release();
+	defaultDevice = NULL;
+
+	// -------------------------
+	float currentVolume = 0;
+	endpointVolume->GetMasterVolumeLevel(&currentVolume);
+
+	hr = endpointVolume->GetMasterVolumeLevelScalar(&currentVolume);
+
+
+	if (bScalar == false)
+	{
+		hr = endpointVolume->SetMasterVolumeLevel((float)newVolume, NULL);
+	}
+	else if (bScalar == true)
+	{
+		hr = endpointVolume->SetMasterVolumeLevelScalar((float)newVolume, NULL);
+	}
+	endpointVolume->Release();
+
+
+
+	CoUninitialize();
+	return false;
+}
+
 
 
 struct mode 
@@ -22,20 +79,21 @@ struct mode
 } modeApp;
 
 
+
 void volumeUp()
 {
-	if (volumeLevel < 255)
+	if (volumeLevel < 1.0)
 	{
-		volumeLevel++;
-		MMRESULT res = waveOutSetVolume(0, (DWORD)volumeLevel);
+		volumeLevel += 0.01;
+		changeVolume(volumeLevel,true);
 	}
 }
 
 void volumeDown()
 {
-	if (volumeLevel >0){
-		volumeLevel--;
-		waveOutSetVolume(0, (DWORD)volumeLevel);
+	if (volumeLevel > 0.0){
+		volumeLevel -= 0.01;
+		changeVolume(volumeLevel,true);
 	}	
 }
 
@@ -43,7 +101,7 @@ void volumeDown()
 void main() {
 	printf("Welcome to Remote Volume Control app!\n\n");
 	
-	//TODO: input port number
+	//TODO: input port number, get initial volume level
 
 	SerialReadCOM* SP = new SerialReadCOM("\\\\.\\COM3");
 
