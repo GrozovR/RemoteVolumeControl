@@ -23,6 +23,8 @@ public:
 
 	bool WriteData(char *buffer, unsigned int nbChar);
 
+	void closeConnection();
+
 	bool isConnected();
 };
 

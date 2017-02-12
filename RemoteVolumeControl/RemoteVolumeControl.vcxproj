@@ -112,9 +112,11 @@
   <ItemGroup>
     <ClCompile Include="controller.cpp" />
     <ClCompile Include="SerialReadCOM.cpp" />
+    <ClCompile Include="VolumeController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SerialReadCOM.h" />
+    <ClInclude Include="VolumeController.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

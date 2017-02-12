@@ -28,7 +28,7 @@ SerialReadCOM::SerialReadCOM(char * portName)
 		}
 		else {
 			dcbSerialParams.BaudRate = CBR_9600;
-			dcbSerialParams.ByteSize = 8; // вот тут хз
+			dcbSerialParams.ByteSize = 8;
 			dcbSerialParams.StopBits = ONESTOPBIT;
 			dcbSerialParams.Parity = NOPARITY;
 			dcbSerialParams.fDtrControl = DTR_CONTROL_ENABLE;
@@ -74,7 +74,7 @@ int SerialReadCOM::ReadData(char * buff, unsigned int nbChar)
 			return bytesRead;
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -89,6 +89,15 @@ bool SerialReadCOM::WriteData(char * buffer, unsigned int nbChar)
 	}
 	else
 		return true;
+}
+
+void SerialReadCOM::closeConnection()
+{
+	if (this->connected) {
+		this->connected = false;
+		CloseHandle(this->hSerial);
+	}
+
 }
 
 bool SerialReadCOM::isConnected()
